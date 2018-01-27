@@ -169,10 +169,14 @@ private:
     float   c_y;
     float   c_z;
     
-    float   cal_x;
-    float   cal_y;
-    float   cal_z;
+    float   cal_x_f;
+    float   cal_y_f;
+    float   cal_z_f;
     
+    float   cal_x_r;
+    float   cal_y_r;
+    float   cal_z_r;
+
     float   c_a;
     float   c_b;
     float   d_focus;
@@ -192,15 +196,23 @@ private:
     c_a = 0;
     c_b = 0;
     
-    cal_x = 1.0;
-    cal_y = 1.0;
-    cal_z = 1.0;
+    cal_x_r = 1.01;
+    cal_y_r = 0.98;
+    cal_z_r = 0.94;
+
+    cal_x_f = 0.975;
+    cal_y_f = 0.975;
+    cal_z_f = 0.788;
+
+
     InitUSB();
     
-    usb_write("1VA2000");
-    usb_write("1AC52000");
-    usb_write("2VA2000");
-    usb_write("2AC52000");
+    usb_write("1VA1500");
+    usb_write("1AC22000");
+    usb_write("2VA1500");
+    usb_write("2AC22000");
+    usb_write("3VA1500");
+    usb_write("3AC22000");
 
 }
 
@@ -220,9 +232,10 @@ void    tiptilt::setxyz(float x, float y, float z)
     float ddy = y - c_y;
     float ddz = z - c_y;
     
-    if (ddx < 0) ddx *= cal_x;
-    if (ddy < 0) ddy *= cal_y;
-    if (ddz < 0) ddz *= cal_z;
+    if (ddx < 0) ddx *= cal_x_r; else ddx *= cal_x_f;
+    if (ddy < 0) ddy *= cal_y_r; else ddy *= cal_y_f;
+    if (ddz < 0) ddz *= cal_z_r; else ddz *= cal_z_f;
+
     
     move(1, round(ddx));
     wait_complete(1);
@@ -334,11 +347,13 @@ int main()
 
     tt = new tiptilt();
 
-    tt->MoveTo(5, 0);
-    tt->MoveTo(0, 0);
-    tt->MoveTo(0,5);
-    tt->MoveTo(0, 0);
-    tt->MoveTo(-5, 0);
+    for (int i = 0; i < 150; i++) {
+	    tt->MoveTo(5, 0);
+	    tt->MoveTo(0, 5);
+            tt->MoveTo(5, 5);
+            tt->MoveTo(0, 0);
+    }
+
     printf("u\n");
     delete tt;
     
