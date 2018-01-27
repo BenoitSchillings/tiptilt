@@ -4,6 +4,7 @@
 #include <string>
 #include <math.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include <libusb-1.0/libusb.h>
 
@@ -85,10 +86,8 @@ int wait_complete(int motor)
 
 int init_usb_connection()
 {
-    printf("init\n");
     libusb_init(&ctx);
     libusb_set_debug(ctx, 3);
-    printf("init1\n");
     
     //Open Device with VendorID and ProductID
     handle = libusb_open_device_with_vid_pid(ctx, USB_VENDOR_ID, USB_PRODUCT_ID);
@@ -97,7 +96,6 @@ int init_usb_connection()
         perror("device not found");
         exit(-1);
     }
-    printf("init2\n");
     
     libusb_reset_device(handle);
     
@@ -117,6 +115,7 @@ void move(int motor, int delta)
 {
     char    buf[256];
     
+    printf("%d %d\n", motor, delta);
     sprintf(buf, "%dPR%d", motor, delta);
     usb_write(buf);
 }
@@ -225,12 +224,15 @@ void    tiptilt::setxyz(float x, float y, float z)
     if (ddy < 0) ddy *= cal_y;
     if (ddz < 0) ddz *= cal_z;
     
-    Move(1, round(ddx));
+    move(1, round(ddx));
     wait_complete(1);
-    Move(2, round(ddy));
+    move(2, round(ddy));
     wait_complete(2);
-    Move(3, round(ddz));
+    move(3, round(ddz));
     wait_complete(3);
+    c_x = x;
+    c_y = y;
+    c_z = z;
 }
 
 //--------------------------------------------------------------------
@@ -249,7 +251,9 @@ void    tiptilt::upd_tilt()
     y += d_focus;
     z += d_focus;
     
+    printf("x2\n");
     setxyz(x, y, z);
+    printf("x3\n");
 }
 
 //--------------------------------------------------------------------
@@ -329,8 +333,14 @@ int main()
     signal(SIGINT, sighandler);
 
     tt = new tiptilt();
-    tt->Move(20, 0);
+
+    tt->MoveTo(5, 0);
+    tt->MoveTo(0, 0);
+    tt->MoveTo(0,5);
+    tt->MoveTo(0, 0);
+    tt->MoveTo(-5, 0);
+    printf("u\n");
     delete tt;
     
-	return 0;
+    return 0;
 }
