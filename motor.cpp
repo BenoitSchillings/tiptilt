@@ -206,13 +206,13 @@ private:
     c_a = 0;
     c_b = 0;
     
-    backward_step_x = 20;
-    backward_step_y = 20;
-    backward_step_z = 25;
+    backward_step_x = 20.10;
+    backward_step_y = 19.94;
+    backward_step_z = 22.44;
 
-    forward_step_x = 20;
-    forward_step_y = 20;
-    forward_step_z = 25;
+    forward_step_x = 23.28;
+    forward_step_y = 23.32;
+    forward_step_z = 26.02;
 
 
     InitUSB();
@@ -329,20 +329,27 @@ void    tiptilt::setxyz(float x, float y, float z)
     
     float ddx = x - c_x;
     float ddy = y - c_y;
-    float ddz = z - c_y;
+    float ddz = z - c_z;
    
 
     int step_x = map_distance_step_x(ddx);
     int step_y = map_distance_step_y(ddy);
     int step_z = map_distance_step_z(ddz);
  
-    
-    move(1, step_x);
-    wait_complete(1);
-    move(2, step_y);
-    wait_complete(2);
-    move(3, step_z);
-    wait_complete(3);
+    if (step_x != 0) {
+	move(1, step_x);
+    	wait_complete(1);
+    }
+
+    if (step_y != 0) {
+	move(2, step_y);
+    	wait_complete(2);
+    }
+
+    if (step_z != 0) {
+    	move(3, step_z);
+    	wait_complete(3);
+    }
     
     c_x += map_step_distance_x(step_x);
     c_y += map_step_distance_y(step_y);
@@ -365,9 +372,7 @@ void    tiptilt::upd_tilt()
     y += d_focus;
     z += d_focus;
     
-    printf("x2\n");
     setxyz(x, y, z);
-    printf("x3\n");
 }
 
 //--------------------------------------------------------------------
@@ -448,11 +453,12 @@ int main()
 
     tt = new tiptilt();
 
-    for (int i = 0; i < 150; i++) {
-	    tt->MoveTo(5, 0);
-	    tt->MoveTo(0, 5);
-            tt->MoveTo(5, 5);
-            tt->MoveTo(0, 0);
+
+
+
+    for (int i = 0; i < 5000; i++) {
+	    tt->MoveFocus(1);
+	    tt->MoveFocus(1);
     }
 
     printf("u\n");
