@@ -160,22 +160,33 @@ private:
 	int     InitUSB();
 	void	CloseUSB();
 
-	int	WriteCommand(string cmd);
+	int	    WriteCommand(string cmd);
 	string	ReadResult();
-    void    upd_tilt();
-    void    setxyz(float x, float y, float z);
     
+
+	int	    map_distance_step_x(float distance);
+	int	    map_distance_step_y(float distance);
+	int	    map_distance_step_z(float distance);
+
+    float    map_step_distance_x(int steps);
+    float    map_step_distance_y(int steps);
+    float    map_step_distance_z(int steps);
+
+	void    upd_tilt();
+    
+    void    setxyz(float x, float y, float z);
+   	 
     float   c_x;
     float   c_y;
     float   c_z;
     
-    float   cal_x_f;
-    float   cal_y_f;
-    float   cal_z_f;
+    float   backward_step_x;
+    float   backward_step_y;
+    float   backward_step_z;
     
-    float   cal_x_r;
-    float   cal_y_r;
-    float   cal_z_r;
+    float   forward_step_x;
+    float   forward_step_y;
+    float   forward_step_z;
 
     float   c_a;
     float   c_b;
@@ -184,7 +195,6 @@ private:
 
 
 //--------------------------------------------------------------------
-
 
 
    tiptilt::tiptilt()
@@ -196,13 +206,13 @@ private:
     c_a = 0;
     c_b = 0;
     
-    cal_x_r = 1.01;
-    cal_y_r = 0.98;
-    cal_z_r = 0.94;
+    backward_step_x = 20;
+    backward_step_y = 20;
+    backward_step_z = 25;
 
-    cal_x_f = 0.975;
-    cal_y_f = 0.975;
-    cal_z_f = 0.788;
+    forward_step_x = 20;
+    forward_step_y = 20;
+    forward_step_z = 25;
 
 
     InitUSB();
@@ -226,26 +236,117 @@ private:
 
 //--------------------------------------------------------------------
 
+int tiptilt::map_distance_step_x(float d)
+{
+    int steps;
+    
+    if (d < 0)
+        steps = round(d / backward_step_x);
+    else
+        steps = round(d / forward_step_x);
+    
+    return steps;
+}
+
+//--------------------------------------------------------------------
+
+int tiptilt::map_distance_step_y(float d)
+{
+    int steps;
+    
+    if (d < 0)
+        steps = round(d / backward_step_y);
+    else
+        steps = round(d / forward_step_y);
+    
+    return steps;
+}
+
+//--------------------------------------------------------------------
+
+int tiptilt::map_distance_step_z(float d)
+{
+    int steps;
+    
+    if (d < 0)
+        steps = round(d / backward_step_z);
+    else
+        steps = round(d / forward_step_z);
+    
+    return steps;
+}
+
+//--------------------------------------------------------------------
+
+float tiptilt::map_step_distance_x(int steps)
+{
+    float d;
+    
+    if (steps < 0)
+        d = steps * backward_step_x;
+    else
+        d = steps * forward_step_x;
+    
+    return d;
+}
+
+//--------------------------------------------------------------------
+
+float tiptilt::map_step_distance_y(int steps)
+{
+    float d;
+    
+    if (steps < 0)
+        d = steps * backward_step_y;
+    else
+        d = steps * forward_step_y;
+    
+    return d;
+}
+
+//--------------------------------------------------------------------
+
+float tiptilt::map_step_distance_z(int steps)
+{
+    float d;
+    
+    if (steps < 0)
+        d = steps * backward_step_z;
+    else
+        d = steps * forward_step_z;
+
+    return d;
+}
+
+//--------------------------------------------------------------------
+
 void    tiptilt::setxyz(float x, float y, float z)
 {
+    
+    x *= 20.0;
+    y *= 20.0;
+    z *= 20.0;
+    
     float ddx = x - c_x;
     float ddy = y - c_y;
     float ddz = z - c_y;
-    
-    if (ddx < 0) ddx *= cal_x_r; else ddx *= cal_x_f;
-    if (ddy < 0) ddy *= cal_y_r; else ddy *= cal_y_f;
-    if (ddz < 0) ddz *= cal_z_r; else ddz *= cal_z_f;
+   
 
+    int step_x = map_distance_step_x(ddx);
+    int step_y = map_distance_step_y(ddy);
+    int step_z = map_distance_step_z(ddz);
+ 
     
-    move(1, round(ddx));
+    move(1, step_x);
     wait_complete(1);
-    move(2, round(ddy));
+    move(2, step_y);
     wait_complete(2);
-    move(3, round(ddz));
+    move(3, step_z);
     wait_complete(3);
-    c_x = x;
-    c_y = y;
-    c_z = z;
+    
+    c_x += map_step_distance_x(step_x);
+    c_y += map_step_distance_y(step_y);
+    c_z += map_step_distance_z(step_z);
 }
 
 //--------------------------------------------------------------------
