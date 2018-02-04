@@ -123,7 +123,7 @@ void move(int motor, int delta)
 //--------------------------------------------------------------------
 
 
-void sighandler(int signum)
+void tt_sighandler(int signum)
 {
     if (handle) {
         libusb_release_interface(handle, 0);
@@ -444,12 +444,13 @@ string	tiptilt::ReadResult()
 
 //--------------------------------------------------------------------
 
+/*
 tiptilt *tt;
 
 
 int main()
 {
-    signal(SIGINT, sighandler);
+    signal(SIGINT, tt_sighandler);
 
     tt = new tiptilt();
 
@@ -466,3 +467,4 @@ int main()
     
     return 0;
 }
+*/
